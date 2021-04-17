@@ -25,6 +25,7 @@ class BookFactory extends Factory
         $authors = Author::factory(3)->create();
         
         return [
+            'isbn' => $this->faker->randomNumber(5),
             'author_id' => $this->faker->randomElement($authors->pluck('id')->toArray()),
             'book_title' => $this->faker->sentence(),
             'cover_url' => $this->faker->imageUrl()
