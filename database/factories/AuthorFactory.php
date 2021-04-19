@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
 use App\Models\Author;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,8 +22,11 @@ class AuthorFactory extends Factory
      */
     public function definition()
     {
+        $books = Book::factory(3)->create();
+        
         return [
-            'author_name' => $this->faker->name
+            'author_name' => $this->faker->name,
+            'book_id' => $this->faker->randomElement($books->pluck('id')->toArray()),
         ];
     }
 }

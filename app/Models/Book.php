@@ -9,9 +9,15 @@ class Book extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['book_title', 'cover_url', 'author_id'];
+    protected $fillable = ['isbn','book_title', 'cover_url'];
 
-    public function author() {
-        return $this->belongsTo(Author::class);
+    public function authors() 
+    {
+        return $this->hasMany(Author::class);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'isbn';
     }
 }

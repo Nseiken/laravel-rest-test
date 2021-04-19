@@ -18,9 +18,7 @@ class CreateBooksTable extends Migration
             $table->string('isbn');
             $table->string('book_title');
             $table->string('cover_url');
-            $table->unsignedBigInteger('author_id');
 
-            $table->foreign('author_id')->references('id')->on('authors');
             $table->timestamps();
         });
     }

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Book;
 use Illuminate\Http\Request;
+use App\Http\Resources\BookResource;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use App\Http\Resources\BookCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class BooksController extends Controller
 {
@@ -16,7 +19,7 @@ class BooksController extends Controller
      */
     public function index()
     {
-        return new BookCollection(Book::latest()->paginate(2));
+        return new BookCollection(Book::with('authors')->paginate(2));
     }
 
     /**
@@ -27,7 +30,11 @@ class BooksController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'isbn' => 'required'
+        ]);
+        $response = Http::get('https://openlibrary.org/api/books?bibkeys=ISBN:1878058517&jscmd=data&format=json');
+        return $response->body();
     }
 
     /**
@@ -36,9 +43,9 @@ class BooksController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function show(Book $book)
+    public function show($isbn)
     {
-        //
+        return response()->xml($this->getXmlResponseBook($isbn), Response::HTTP_OK, [], 'Libros');
     }
 
     /**
@@ -62,5 +69,29 @@ class BooksController extends Controller
     public function destroy(Book $book)
     {
         //
+    }
+
+    protected function getXmlResponseBook($isbn)
+    {
+        if (Book::where('isbn', $isbn)->count() > 0) {
+            $response = (new BookResource(Book::where('isbn', $isbn)->first()->load('authors')))->response();
+
+            $responseData = $response->getData()->data;
+
+            $arrayResponse = [
+                'Libro' => [
+                    'Titulo' => $responseData->book_title,
+                    'ISBN' => $responseData->isbn,
+                    'Caratula' => $responseData->cover_url,
+                    'Autores' => collect($responseData->authors)->map(function ($author) {
+                        return $author->author_name;
+                    })
+                ]
+            ];
+        } else {
+            $arrayResponse = ['Libro' => 'Error Libro no encontrado'];
+        }
+
+        return $arrayResponse;
     }
 }
