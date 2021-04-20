@@ -3,7 +3,7 @@
 namespace Tests\Feature\Api\BooksController;
 
 use Tests\TestCase;
-use App\Models\Author;
+use App\Models\Book;
 use Illuminate\Foundation\Testing\WithFaker;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,13 +28,17 @@ class BooksControllerTest extends TestCase
         $book = $this->createFactoryBook();
 
         $response = $this->json('GET', "api/books/{$book->isbn}");
-
+        
+        $this->assertDatabaseHas('books', [
+            'isbn' => $book->isbn
+        ]);
+        
         $response->assertStatus(Response::HTTP_OK);
     }
 
 
     protected function createFactoryBook()
     {
-        return Author::factory()->create();
+        return Book::factory()->create();
     }
 }
